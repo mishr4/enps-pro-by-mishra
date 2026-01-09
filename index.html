@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>MBC ProPrompter</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+:root {
+  --bg: #0b0f14;
+  --panel: rgba(20,25,34,0.85);
+  --accent: #3aa0ff;
+  --text: #ffffff;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: Inter, Arial, sans-serif;
+  overflow: hidden;
+}
+
+/* HEADER */
+header {
+  position: fixed;
+  top: 0;
+  width: 100%;
+  padding: 12px 20px;
+  background: linear-gradient(to right, #111827, #0b0f14);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  z-index: 20;
+}
+
+header h1 {
+  font-size: 18px;
+  margin: 0;
+  font-weight: 600;
+}
+
+header span {
+  font-size: 12px;
+  opacity: 0.7;
+}
+
+/* CONTROL PANEL */
+#controls {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--panel);
+  backdrop-filter: blur(10px);
+  padding: 12px 16px;
+  border-radius: 14px;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  z-index: 20;
+}
+
+button {
+  background: #1f2937;
+  border: none;
+  color: white;
+  padding: 8px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+button:hover {
+  background: var(--accent);
+}
+
+input[type="range"] {
+  width: 120px;
+}
+
+/* SCRIPT AREA */
+#viewport {
+  position: absolute;
+  top: 60px;
+  bottom: 0;
+  width: 100%;
+  overflow: hidden;
+}
+
+#script {
+  position: absolute;
+  width: 100%;
+  padding: 80px 120px;
+  text-align: center;
+  font-size: 52px;
+  line-height: 1.5;
+}
+
+#script[contenteditable="true"]:focus {
+  outline: none;
+}
+
+/* MARKERS */
+.marker {
+  color: var(--accent);
+  font-weight: 700;
+  font-size: 0.8em;
+  margin: 40px 0;
+  display: block;
+}
+
+/* MIRROR MODE */
+.mirror {
+  transform: scaleX(-1);
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <h1>MBC ProPrompter</h1>
+  <span>Mishra Broadcasting Co.</span>
+</header>
+
+<div id="viewport">
+  <div id="script" contenteditable="true">
+    <span class="marker">ANCHOR</span>
+    Good evening. This is MBC News.
+
+    <span class="marker">VO</span>
+    Tonight, breaking developments from around the world.
+
+    <span class="marker">PKG</span>
+    Our correspondents have the latest details.
+
+    This script is fully editable live.
+  </div>
+</div>
+
+<div id="controls">
+  <button onclick="toggleRun()">▶ / ❚❚</button>
+  <button onclick="resetScroll()">Reset</button>
+  <label>Speed</label>
+  <input type="range" min="0.2" max="3" step="0.1" value="0.6" id="speed">
+  <label>Size</label>
+  <input type="range" min="32" max="80" step="2" value="52" id="size">
+  <button onclick="toggleMirror()">Mirror</button>
+</div>
+
+<script>
+let running = false;
+let y = window.innerHeight;
+const script = document.getElementById("script");
+const speedInput = document.getElementById("speed");
+const sizeInput = document.getElementById("size");
+
+function loop() {
+  if (running) {
+    y -= parseFloat(speedInput.value);
+    script.style.top = y + "px";
+  }
+  requestAnimationFrame(loop);
+}
+
+function toggleRun() {
+  running = !running;
+}
+
+function resetScroll() {
+  running = false;
+  y = window.innerHeight;
+  script.style.top = y + "px";
+}
+
+function toggleMirror() {
+  document.body.classList.toggle("mirror");
+}
+
+sizeInput.addEventListener("input", () => {
+  script.style.fontSize = sizeInput.value + "px";
+});
+
+/* Keyboard Shortcuts */
+document.addEventListener("keydown", e => {
+  if (e.code === "Space") toggleRun();
+  if (e.code === "ArrowUp") speedInput.value = (+speedInput.value + 0.1).toFixed(1);
+  if (e.code === "ArrowDown") speedInput.value = Math.max(0.1, speedInput.value - 0.1).toFixed(1);
+});
+
+loop();
+</script>
+
+</body>
+</html>
