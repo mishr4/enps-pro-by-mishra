@@ -2,128 +2,151 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>MBC ProPrompter</title>
+<title>MBC Newsroom</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
 :root {
-  --bg: #000;
-  --text: #fff;
-  --accent: #2ea3ff;
+  --bg: #0a0d12;
+  --panel: #121722;
+  --panel2: #181f2e;
+  --accent: #3aa0ff;
+  --text: #e6e9ef;
+  --muted: #8a94a7;
 }
+
+* { box-sizing: border-box; }
 
 body {
   margin: 0;
   background: var(--bg);
   color: var(--text);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: Inter, Arial, sans-serif;
+  height: 100vh;
   overflow: hidden;
+  display: grid;
+  grid-template-rows: 40px 1fr;
 }
 
 /* HEADER */
 header {
-  position: fixed;
-  top: 0;
-  width: 100%;
-  height: 48px;
-  background: #050505;
+  background: linear-gradient(to right, #0f172a, #0a0d12);
   display: flex;
   align-items: center;
-  padding: 0 16px;
-  z-index: 20;
+  padding: 0 14px;
   font-size: 14px;
 }
 
-/* VIEWPORT */
-#viewport {
-  position: absolute;
-  top: 48px;
-  bottom: 80px;
-  width: 100%;
-  overflow-y: auto;
-  scroll-behavior: smooth;
-  padding: 0 18%;
+/* MAIN LAYOUT */
+main {
+  display: grid;
+  grid-template-columns: 280px 1fr 420px;
+  height: 100%;
 }
 
-/* SCRIPT */
-#script {
-  font-size: 54px;
+/* RUNDOWN */
+#rundown {
+  background: var(--panel);
+  border-right: 1px solid #1f2937;
+  overflow-y: auto;
+}
+
+.rundown-item {
+  padding: 10px;
+  border-bottom: 1px solid #1f2937;
+  cursor: pointer;
+}
+
+.rundown-item.active {
+  background: var(--panel2);
+}
+
+.status {
+  font-size: 11px;
+  color: var(--accent);
+}
+
+/* EDITOR */
+#editor {
+  background: var(--panel2);
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+}
+
+#slug {
+  font-size: 16px;
+  font-weight: bold;
+  margin-bottom: 6px;
+}
+
+#story {
+  flex: 1;
+  background: #0b1220;
+  padding: 14px;
+  font-size: 15px;
+  line-height: 1.5;
+  overflow-y: auto;
+}
+
+#story:focus {
+  outline: none;
+}
+
+/* CONTROL BAR */
+#meta {
+  display: flex;
+  gap: 10px;
+  padding-top: 8px;
+  font-size: 12px;
+}
+
+select, input {
+  background: #0b1220;
+  color: white;
+  border: 1px solid #1f2937;
+  padding: 4px;
+}
+
+/* PROMPTER */
+#prompter {
+  background: black;
+  display: flex;
+  flex-direction: column;
+}
+
+#prompterHeader {
+  height: 40px;
+  background: #050505;
+  display: flex;
+  align-items: center;
+  padding: 0 10px;
+  font-size: 12px;
+}
+
+#prompterViewport {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0 14%;
+}
+
+#prompterText {
+  font-size: 48px;
   line-height: 1.55;
   text-align: center;
   padding: 80px 0;
 }
 
-#script:focus {
-  outline: none;
-}
-
-/* MARKERS */
-.marker {
-  display: block;
-  margin: 50px 0;
-  font-size: 0.75em;
-  font-weight: bold;
-  color: var(--accent);
-}
-
-/* EDGE FADE (REAL PROMPTER LOOK) */
-.fade-top, .fade-bottom {
-  position: fixed;
-  left: 0;
-  width: 100%;
-  height: 80px;
-  pointer-events: none;
-  z-index: 10;
-}
-
-.fade-top {
-  top: 48px;
-  background: linear-gradient(to bottom, #000, transparent);
-}
-
-.fade-bottom {
-  bottom: 80px;
-  background: linear-gradient(to top, #000, transparent);
-}
-
-/* CONTROLS */
-#controls {
-  position: fixed;
-  bottom: 0;
-  width: 100%;
-  height: 80px;
-  background: #050505;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 14px;
-  z-index: 20;
-}
-
-button {
-  background: #1a1a1a;
-  color: white;
-  border: none;
-  padding: 10px 16px;
-  font-size: 14px;
-  cursor: pointer;
-}
-
-button:hover {
-  background: var(--accent);
-}
-
-/* COUNTDOWN OVERLAY */
+/* COUNTDOWN */
 #countdown {
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,0.85);
+  background: rgba(0,0,0,.9);
   display: none;
   align-items: center;
   justify-content: center;
   font-size: 120px;
-  font-weight: bold;
-  z-index: 100;
+  z-index: 200;
 }
 </style>
 </head>
@@ -131,89 +154,135 @@ button:hover {
 <body>
 
 <header>
-  MBC ProPrompter — Mishra Broadcasting Co.
+  MBC Newsroom — Rundown Editor (ENPS-Style)
 </header>
 
-<div id="viewport">
-  <div id="script" contenteditable="true">
-    <span class="marker">ANCHOR</span>
-    Good evening. This is MBC News.
+<main>
 
-    <span class="marker">HEADLINES</span>
-    Tensions continue to rise following major developments in Venezuela.
+<!-- RUNDOWN -->
+<section id="rundown"></section>
 
-    <span class="marker">STORY</span>
-    We begin tonight with breaking details involving former U.S. President Donald Trump and a high-stakes international kidnapping investigation.
+<!-- EDITOR -->
+<section id="editor">
+  <div id="slug">HEADLINES</div>
+  <div id="story" contenteditable="true"></div>
+
+  <div id="meta">
+    <label>Status
+      <select id="status">
+        <option>READY</option>
+        <option>HOLD</option>
+        <option>TAKEN</option>
+      </select>
+    </label>
+
+    <label>Time
+      <input id="time" value="00:30">
+    </label>
+
+    <button onclick="sendToPrompter()">SEND TO PROMPTER</button>
   </div>
-</div>
+</section>
 
-<div class="fade-top"></div>
-<div class="fade-bottom"></div>
+<!-- PROMPTER -->
+<section id="prompter">
+  <div id="prompterHeader">ANCHOR PROMPTER</div>
+  <div id="prompterViewport">
+    <div id="prompterText"></div>
+  </div>
+</section>
 
-<div id="controls">
-  <button onclick="startWithCountdown()">PLAY</button>
-  <button onclick="pause()">PAUSE</button>
-  <button onclick="reset()">RESET</button>
-</div>
+</main>
 
 <div id="countdown">5</div>
 
 <script>
-const viewport = document.getElementById("viewport");
+const rundownData = [
+  {
+    slug: "HEADLINES",
+    text: "Good evening. This is MBC News.\n\nTonight, breaking developments in Venezuela.\n\nAnd later, new details in the Trump kidnapping investigation.",
+    status: "READY",
+    time: "00:20"
+  },
+  {
+    slug: "VENEZUELA",
+    text: "Tensions are rising after international actions involving Venezuela.\n\nOfficials warn the situation could escalate further.",
+    status: "READY",
+    time: "01:10"
+  },
+  {
+    slug: "TRUMP KIDNAPPING",
+    text: "We turn now to a high-stakes investigation involving former President Donald Trump.\n\nAuthorities say details are still emerging.",
+    status: "HOLD",
+    time: "01:30"
+  }
+];
+
+let activeIndex = 0;
+const rundown = document.getElementById("rundown");
+const slug = document.getElementById("slug");
+const story = document.getElementById("story");
+const status = document.getElementById("status");
+const time = document.getElementById("time");
+const prompterText = document.getElementById("prompterText");
+const viewport = document.getElementById("prompterViewport");
 const countdown = document.getElementById("countdown");
 
-let speed = 0.5;
-let running = false;
-let countdownTimer;
-
-/* MAIN SCROLL LOOP */
-function scrollLoop() {
-  if (running) {
-    viewport.scrollTop += speed;
-  }
-  requestAnimationFrame(scrollLoop);
+function renderRundown() {
+  rundown.innerHTML = "";
+  rundownData.forEach((item, i) => {
+    const div = document.createElement("div");
+    div.className = "rundown-item" + (i === activeIndex ? " active" : "");
+    div.innerHTML = `<strong>${item.slug}</strong><br><span class="status">${item.status}</span>`;
+    div.onclick = () => loadStory(i);
+    rundown.appendChild(div);
+  });
 }
-scrollLoop();
 
-/* PLAY WITH COUNTDOWN */
-function startWithCountdown() {
-  running = false;
-  let count = 5;
-  countdown.textContent = count;
+function loadStory(i) {
+  activeIndex = i;
+  const item = rundownData[i];
+  slug.textContent = item.slug;
+  story.textContent = item.text;
+  status.value = item.status;
+  time.value = item.time;
+  renderRundown();
+}
+
+function sendToPrompter() {
+  rundownData[activeIndex].text = story.textContent;
+  prompterText.textContent = story.textContent;
+  viewport.scrollTop = 0;
+  startCountdown();
+}
+
+function startCountdown() {
+  let c = 5;
   countdown.style.display = "flex";
-
-  countdownTimer = setInterval(() => {
-    count--;
-    countdown.textContent = count;
-
-    if (count === 0) {
-      clearInterval(countdownTimer);
+  countdown.textContent = c;
+  const timer = setInterval(() => {
+    c--;
+    countdown.textContent = c;
+    if (c === 0) {
+      clearInterval(timer);
       countdown.style.display = "none";
-      running = true;
+      autoScroll();
     }
   }, 1000);
 }
 
-/* PAUSE */
-function pause() {
-  running = false;
+let running = true;
+function autoScroll() {
+  running = true;
 }
 
-/* RESET SAFELY */
-function reset() {
-  running = false;
-  viewport.scrollTop = 0;
-}
+(function scrollLoop() {
+  if (running) viewport.scrollTop += 0.4;
+  requestAnimationFrame(scrollLoop);
+})();
 
-/* KEYBOARD (NEWSROOM STYLE) */
-document.addEventListener("keydown", e => {
-  if (e.code === "Space") {
-    e.preventDefault();
-    running = !running;
-  }
-  if (e.code === "ArrowUp") speed += 0.1;
-  if (e.code === "ArrowDown") speed = Math.max(0.1, speed - 0.1);
-});
+loadStory(0);
+renderRundown();
 </script>
 
 </body>
